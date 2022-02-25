@@ -32,6 +32,7 @@ int parse(char* s, char** argv) {
   char* p;
   int c = 0;
   int redirect_flag = 0;      // becomes 1 when we encounter either '<' or '>'
+  int pipe_flag = 0;
   /* TODO */    // write parser that breaks input into argv[] structure
   // e.g., cal  -h  2022\0      // would be
   //       |    |   |
@@ -59,6 +60,11 @@ int parse(char* s, char** argv) {
         redirect_status2 = 1; 
         redirect_flag = 1;
       }
+
+      else if(*s == '|') {
+        pipe_status = 1;
+        pipe_flag = 1;
+      }
        
     // save the location of where the beginning of the token is and increase the counter of tokens
     // if amp_status is not 0, it will not append the '&' as that will be a flag to determine for it to run concurrently
@@ -66,6 +72,10 @@ int parse(char* s, char** argv) {
 
      if( redirect_flag == 1) {    // we will not log either < or > into the char array
         redirect_flag = 0;        // set it back to 0 to still input other arguments past < or >
+     }
+
+     else if(pipe_flag == 1) {    // not log | into the char array
+       pipe_flag = 0;             // set it back to 0 to get next input past |
      }
 
       else {
@@ -123,7 +133,7 @@ int execute(char* input) {
     // if ((ret = execlp("cal", "cal", NULL)) < 0) {  // can do it arg by arg, ending in NULL
 
 
-    //don't know if this will work
+    //not working as intended unfortunately (must enter exit once u do ls < file.txt for example)
     //----------------------------------------------------------------------------------------//
 
     // if redirect_status1 = 1
@@ -151,6 +161,29 @@ int execute(char* input) {
       redirect_status2 = 0;             // convert it back to 0
     }
     // //----------------------------------------------------------------------------------------//
+
+    // //----------------------------------------------------------------------------------------//
+    // couldn't figure out piping 
+  //   if(pipe_status == 1) {            // found a '|' within the arguments meaning to pipe 
+  //       int fd[2];
+  //       pid_t pid_2;
+
+  //       if(pipe(fd) == -1) {
+  //         printf("pipe has failed...\n");
+  //       }
+  //       else {
+  //         pid_2 = fork();
+
+  //         if (pid < 0) {
+	// 	      printf("Fork failed...\n");
+		      
+	// }
+
+  //       }
+  //   }
+
+    // //----------------------------------------------------------------------------------------//
+
 
     else if ((ret = execvp(*shell_argv, shell_argv)) < 0) {
       fprintf(stderr, "execlp(%s) failed with error code: %d\n", *shell_argv, ret);
